@@ -4,26 +4,42 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <map>
 using namespace std;
 
 vector<int> GetHIndexScore(vector<int> citations_per_paper) {
     vector<int> h_index;
-    int papers = 0;
     // TODO: Calculate and return h-index score for each paper.
+    int papers = 0;
+    int citations = 1;
     for (auto i = citations_per_paper.begin(); i != citations_per_paper.end(); ++i) 
     {
         papers++;
-        int citations = 1;
-        if (i == citations_per_paper.begin())
+        
+        int most_citations;
+        //if it is the first element
+        if (i == citations_per_paper.begin()) {
             h_index.push_back(1);
+        }           
         else
-        {
-            int smallest = *min_element(citations_per_paper.begin(), --i);
-            int largest = *max_element(citations_per_paper.begin(), --i);
-            if (*i > largest) {
+        {  
 
+
+            auto largest = citations_per_paper.begin();
+            for (auto j = citations_per_paper.begin(); j != i; ++j) {
+                if (*i > *j && *j <= papers && *j > citations && *j >= *largest) {
+                    citations = *j;
+                    largest = j;
+                }
+                else if (*i < *j && *i <= papers && *i > citations && *i <= *largest) {
+                    citations = *i;
+                    largest = i;
+                }
+                else if (*i == *j && *i <= papers && *i > citations) {
+                    citations++;
+                }
             }
-
+            h_index.push_back(citations);
         }
     }
     return h_index;
