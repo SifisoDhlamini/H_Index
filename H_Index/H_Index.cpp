@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <map>
 using namespace std;
 
 int fits_in(vector<int> v, int x) {
@@ -19,65 +20,30 @@ vector<int> GetHIndexScore(vector<int> citations_per_paper) {
     vector<int> h_index;
     // TODO: Calculate and return h-index score for each paper.
     int papers = 0;
-    int current_indexer{};
+    int max = 0;
     for (auto i = citations_per_paper.begin(); i != citations_per_paper.end(); ++i)
     {
         papers++;
         //if it is the first element
         if (i == citations_per_paper.begin()) {
             h_index.push_back(1);
-            current_indexer = *i;
         }
         else
         {
             //create copy of sub vector up to i
             vector<int> newVec{ citations_per_paper.begin(), citations_per_paper.begin() + papers };
-
-            //check how many papers at least have *i citations
-            int i_citations = fits_in(newVec, *i);
-            //int ci_citations = fits_in(newVec, current_indexer);
-            int last = h_index.back();
-            //find the H_index
-            if (*i > last) {
-                if (*i >= current_indexer) {
-                    if (i_citations >= last) {
-                        if (*i <= papers) {
-                            h_index.push_back(i_citations);
-                            current_indexer = *i;
-                        }
-                        else {
-                            h_index.push_back(last);
-                        }                        
-                    }
-                    else if (i_citations < last)
-                    {
-                        int ci_citations = last + 1;
-                        if (ci_citations <= current_indexer)
-                            h_index.push_back(ci_citations);
-                        else {
-                            h_index.push_back(last);
-                        }
-                    }
-                }
-                else if (*i < current_indexer) {
-                    if (i_citations > last && *i >= i_citations) {
-                        if (*i <= papers) {
-                            h_index.push_back(i_citations);
-                            current_indexer = *i;
-                        }
-                        else {
-                            h_index.push_back(last);
-                        }
-                    }
-                    else
-                    {
-                        h_index.push_back(last);
-                    }
+            map<int, int> mCit;
+            for (auto j : newVec) {
+                mCit.insert({j, fits_in(newVec, j)});
+            }
+            for (auto j : mCit) {
+                if (j.second > max && j.first >= j.second)
+                    max = j.second;
+                else if (j.second > max && j.first < j.second) {
+                    max = j.first;
                 }
             }
-            else {
-                h_index.push_back(last);
-            }
+            h_index.push_back(max);
         }
     }
     return h_index;
