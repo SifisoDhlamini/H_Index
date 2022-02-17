@@ -52,7 +52,11 @@ vector<int> GetHIndexScore(vector<int> citations_per_paper) {
                     else if (i_citations < last)
                     {
                         int ci_citations = last + 1;
-                        h_index.push_back(ci_citations);
+                        if (ci_citations <= current_indexer)
+                            h_index.push_back(ci_citations);
+                        else {
+                            h_index.push_back(last);
+                        }
                     }
                 }
                 else if (*i < current_indexer) {
