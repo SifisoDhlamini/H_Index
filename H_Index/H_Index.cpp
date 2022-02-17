@@ -4,42 +4,76 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include <map>
 using namespace std;
+
+int fits_in(vector<int> v, int x) {
+    int count = 0;
+    for (auto i = v.begin(); i != v.end(); ++i) {
+        bool fits = ((*i / x) >= 1) ? true : false;
+        if (fits) count++;
+    }
+    return count;
+}
 
 vector<int> GetHIndexScore(vector<int> citations_per_paper) {
     vector<int> h_index;
     // TODO: Calculate and return h-index score for each paper.
     int papers = 0;
-    int citations = 1;
-    for (auto i = citations_per_paper.begin(); i != citations_per_paper.end(); ++i) 
+    int current_indexer{};
+    for (auto i = citations_per_paper.begin(); i != citations_per_paper.end(); ++i)
     {
         papers++;
-        
-        int most_citations;
         //if it is the first element
         if (i == citations_per_paper.begin()) {
             h_index.push_back(1);
-        }           
+            current_indexer = *i;
+        }
         else
-        {  
+        {
+            //create copy of sub vector up to i
+            vector<int> newVec{ citations_per_paper.begin(), citations_per_paper.begin() + papers };
 
-
-            auto largest = citations_per_paper.begin();
-            for (auto j = citations_per_paper.begin(); j != i; ++j) {
-                if (*i > *j && *j <= papers && *j > citations && *j >= *largest) {
-                    citations = *j;
-                    largest = j;
+            //check how many papers at least have *i citations
+            int i_citations = fits_in(newVec, *i);
+            //int ci_citations = fits_in(newVec, current_indexer);
+            int last = h_index.back();
+            //find the H_index
+            if (*i > last) {
+                if (*i >= current_indexer) {
+                    if (i_citations >= last) {
+                        if (*i <= papers) {
+                            h_index.push_back(i_citations);
+                            current_indexer = *i;
+                        }
+                        else {
+                            h_index.push_back(last);
+                        }                        
+                    }
+                    else if (i_citations < last)
+                    {
+                        int ci_citations = last + 1;
+                        h_index.push_back(ci_citations);
+                    }
                 }
-                else if (*i < *j && *i <= papers && *i > citations && *i <= *largest) {
-                    citations = *i;
-                    largest = i;
-                }
-                else if (*i == *j && *i <= papers && *i > citations) {
-                    citations++;
+                else if (*i < current_indexer) {
+                    if (i_citations > last && *i >= i_citations) {
+                        if (*i <= papers) {
+                            h_index.push_back(i_citations);
+                            current_indexer = *i;
+                        }
+                        else {
+                            h_index.push_back(last);
+                        }
+                    }
+                    else
+                    {
+                        h_index.push_back(last);
+                    }
                 }
             }
-            h_index.push_back(citations);
+            else {
+                h_index.push_back(last);
+            }
         }
     }
     return h_index;
