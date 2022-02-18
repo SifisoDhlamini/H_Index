@@ -16,34 +16,63 @@ int fits_in(vector<int> v, int x) {
     return count;
 }
 
+void removeInvalid(vector<int> v, int m) {
+    for (auto i : v) {
+        if (i < m)
+            v.erase(remove(v.begin(), v.end(), i));
+    }
+}
+
+
 vector<int> GetHIndexScore(vector<int> citations_per_paper) {
     vector<int> h_index;
     // TODO: Calculate and return h-index score for each paper.
     int papers = 0;
     int max = 0;
+    vector<int> valid;
     for (auto i = citations_per_paper.begin(); i != citations_per_paper.end(); ++i)
     {
         papers++;
         //if it is the first element
-        if (i == citations_per_paper.begin()) {
+        if (papers == 1) {
             h_index.push_back(1);
+            max = 1;
+            valid.push_back(*i);
         }
         else
         {
-            //create copy of sub vector up to i
-            vector<int> newVec{ citations_per_paper.begin(), citations_per_paper.begin() + papers };
-            map<int, int> mCit;
-            for (auto j : newVec) {
-                mCit.insert({j, fits_in(newVec, j)});
-            }
-            for (auto j : mCit) {
-                if (j.second > max && j.first >= j.second)
-                    max = j.second;
-                else if (j.second > max && j.first < j.second) {
-                    max = j.first;
+            if (*i > max) {
+                removeInvalid(valid, max);
+                valid.push_back(*i);
+                map<int, int> mCit;
+                for (auto j : valid) {
+                    mCit.insert({ j, fits_in(valid, j) });
+                }
+                for (auto j : mCit) {
+                    if (j.second > max && j.first >= j.second)
+                        max = j.second;
+                    else if (j.second > max && j.first < j.second) {
+                        max = j.first;
+                    }
                 }
             }
             h_index.push_back(max);
+            
+
+        //    //create copy of sub vector up to i
+        //    vector<int> newVec{ citations_per_paper.begin(), citations_per_paper.begin() + papers };
+        //    map<int, int> mCit;
+        //    for (auto j : newVec) {
+        //        mCit.insert({j, fits_in(newVec, j)});
+        //    }
+        //    for (auto j : mCit) {
+        //        if (j.second > max && j.first >= j.second)
+        //            max = j.second;
+        //        else if (j.second > max && j.first < j.second) {
+        //            max = j.first;
+        //        }
+        //    }
+        //    h_index.push_back(max);
         }
     }
     return h_index;
