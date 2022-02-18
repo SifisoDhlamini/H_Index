@@ -7,14 +7,6 @@
 #include <queue>
 using namespace std;
 
-void removeInvalid(vector<int> v, int m) {
-    for (auto i : v) {
-        if (i < m)
-            v.erase(remove(v.begin(), v.end(), i));
-    }
-}
-
-
 vector<int> GetHIndexScore(vector<int> citations_per_paper) {
     vector<int> h_index;
     // TODO: Calculate and return h-index score for each paper.
